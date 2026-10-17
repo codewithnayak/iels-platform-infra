@@ -39,3 +39,9 @@ steps:
         terraform validate
 
         echo "Terraform initialization and validation completed."
+
+        echo "Generating Terraform plan..."
+        terraform plan -input=false -out=tfplan
+
+        echo "Displaying Terraform plan..."
+        terraform show -no-color tfplan
