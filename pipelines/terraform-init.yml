@@ -45,3 +45,16 @@ steps:
 
         echo "Displaying Terraform plan..."
         terraform show -no-color tfplan
+
+        echo "Applying Terraform plan..."
+        terraform apply -input=false tfplan
+
+        echo "Verifying Azure Container Registry..."
+        az acr show \
+          --name acrielsfirdev \
+          --resource-group rg-iels-dev \
+          --query "{Name:name, Location:location, SKU:sku.name, LoginServer:loginServer}" \
+          --output table
+
+        echo "Checking Terraform state..."
+        terraform state list
