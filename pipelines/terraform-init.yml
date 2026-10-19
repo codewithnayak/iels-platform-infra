@@ -7,54 +7,81 @@ pool:
 variables:
   azureServiceConnection: "sc-iels-azure-dev"
   terraformWorkingDirectory: "environments/dev"
+  terraformPlanArtifact: "terraform-plan"
 
-steps:
-  - checkout: self
+stages:
+  - stage: Plan
+    displayName: "Terraform Plan"
+    jobs:
+      - job: TerraformPlan
+        displayName: "Validate and create plan"
+        steps:
+          - checkout: self
 
-  - task: AzureCLI@2
-    displayName: "Terraform Init and Validate"
-    inputs:
-      azureSubscription: "$(azureServiceConnection)"
-      scriptType: "bash"
-      scriptLocation: "inlineScript"
-      addSpnToEnvironment: true
-      workingDirectory: "$(Build.SourcesDirectory)/$(terraformWorkingDirectory)"
-      inlineScript: |
-        set -euo pipefail
+          - task: AzureCLI@2
+            displayName: "Terraform init, validate and plan"
+            inputs:
+              azureSubscription: "$(azureServiceConnection)"
+              scriptType: bash
+              scriptLocation: inlineScript
+              addSpnToEnvironment: true
+              workingDirectory: "$(Build.SourcesDirectory)/$(terraformWorkingDirectory)"
+              inlineScript: |
+                set -euo pipefail
+                export ARM_USE_OIDC=true
+                export ARM_USE_AZUREAD=true
+                export ARM_CLIENT_ID="$servicePrincipalId"
+                export ARM_TENANT_ID="$tenantId"
+                export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+                export ARM_OIDC_TOKEN="$idToken"
 
-        export ARM_USE_OIDC=true
-        export ARM_USE_AZUREAD=true
-        export ARM_CLIENT_ID="$servicePrincipalId"
-        export ARM_TENANT_ID="$tenantId"
-        export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
-        export ARM_OIDC_TOKEN="$idToken"
+                terraform init -input=false
+                terraform fmt -check -recursive
+                terraform validate
+                terraform plan -input=false -out=tfplan
+                terraform show -no-color tfplan > tfplan.txt
+                cat tfplan.txt
 
-        echo "Initializing Terraform..."
-        terraform init -input=false
+                mkdir -p '$(Build.ArtifactStagingDirectory)/terraform-plan'
+                cp tfplan tfplan.txt '$(Build.ArtifactStagingDirectory)/terraform-plan/'
 
-        echo "Checking Terraform formatting..."
-        terraform fmt -check -recursive
+          - publish: "$(Build.ArtifactStagingDirectory)/terraform-plan"
+            artifact: "$(terraformPlanArtifact)"
+            displayName: "Publish saved plan and review output"
 
-        echo "Validating Terraform configuration..."
-        terraform validate
+  - stage: Apply
+    displayName: "Terraform Apply (approval required)"
+    dependsOn: Plan
+    condition: succeeded()
+    jobs:
+      - deployment: TerraformApply
+        displayName: "Apply approved Terraform plan"
+        environment: "iels-dev-infra"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - download: current
+                  artifact: "$(terraformPlanArtifact)"
 
-        echo "Terraform initialization and validation completed."
+                - task: AzureCLI@2
+                  displayName: "Apply saved Terraform plan"
+                  inputs:
+                    azureSubscription: "$(azureServiceConnection)"
+                    scriptType: bash
+                    scriptLocation: inlineScript
+                    addSpnToEnvironment: true
+                    workingDirectory: "$(Build.SourcesDirectory)/$(terraformWorkingDirectory)"
+                    inlineScript: |
+                      set -euo pipefail
+                      export ARM_USE_OIDC=true
+                      export ARM_USE_AZUREAD=true
+                      export ARM_CLIENT_ID="$servicePrincipalId"
+                      export ARM_TENANT_ID="$tenantId"
+                      export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+                      export ARM_OIDC_TOKEN="$idToken"
 
-        echo "Generating Terraform plan..."
-        terraform plan -input=false -out=tfplan
-
-        echo "Displaying Terraform plan..."
-        terraform show -no-color tfplan
-
-        echo "Applying Terraform plan..."
-        terraform apply -input=false tfplan
-
-        echo "Verifying Azure Container Registry..."
-        az acr show \
-          --name acrielsfirdev \
-          --resource-group rg-iels-dev \
-          --query "{Name:name, Location:location, SKU:sku.name, LoginServer:loginServer}" \
-          --output table
-
-        echo "Checking Terraform state..."
-        terraform state list
+                      terraform init -input=false
+                      terraform apply -input=false '$(Pipeline.Workspace)/$(terraformPlanArtifact)/tfplan'
+                      terraform state list
