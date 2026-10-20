@@ -14,11 +14,17 @@ resource "azurerm_log_analytics_workspace" "iels" {
   }
 }
 
+
 resource "azurerm_container_app_environment" "iels" {
   name                       = "cae-iels-dev"
   location                   = "uksouth"
   resource_group_name        = "rg-iels-dev"
   log_analytics_workspace_id = azurerm_log_analytics_workspace.iels.id
+
+  workload_profile {
+    name                  = "Consumption"
+    workload_profile_type = "Consumption"
+  }
 
   tags = {
     environment = "dev"
@@ -26,3 +32,4 @@ resource "azurerm_container_app_environment" "iels" {
     managed_by  = "terraform"
   }
 }
+
