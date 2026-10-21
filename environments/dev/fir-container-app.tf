@@ -49,6 +49,8 @@ resource "azurerm_container_app" "fir" {
     }
   }
 
+  workload_profile_name = "Consumption"
+
   lifecycle {
     ignore_changes = [
       template[0].container[0].image
