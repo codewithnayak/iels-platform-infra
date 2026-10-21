@@ -49,6 +49,12 @@ resource "azurerm_container_app" "fir" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [
+      template[0].container[0].image
+    ]
+  }
+
   tags = {
     environment = "dev"
     project     = "IELS"
