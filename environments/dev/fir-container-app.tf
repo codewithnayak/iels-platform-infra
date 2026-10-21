@@ -43,7 +43,7 @@ resource "azurerm_container_app" "fir" {
 
     container {
       name   = "fir-api"
-      image  = "${data.azurerm_container_registry.iels.login_server}/iels-fir-api:22"
+      image  = "${data.azurerm_container_registry.iels.login_server}/iels-fir-api:24"
       cpu    = 0.5
       memory = "1Gi"
     }
