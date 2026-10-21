@@ -1,7 +1,7 @@
 resource "azurerm_application_insights" "fir" {
   name                = "appi-iels-fir-dev"
-  location            = azurerm_resource_group.iels.location
-  resource_group_name = azurerm_resource_group.iels.name
+  location            = "uksouth"
+  resource_group_name = "rg-iels-dev"
 
   application_type = "web"
 
