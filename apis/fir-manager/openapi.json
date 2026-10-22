@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.1",
+  "openapi": "3.0.3",
   "info": {
     "title": "IELS.FIR.Api | v1",
     "version": "1.0.0"
@@ -151,7 +151,8 @@
             "type": "string"
           },
           "field": {
-            "type": ["null", "string"]
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -163,10 +164,8 @@
             "type": "boolean"
           },
           "data": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
+            "nullable": true,
+            "allOf": [
               {
                 "$ref": "#/components/schemas/FirResponse"
               }
@@ -179,7 +178,8 @@
             }
           },
           "traceId": {
-            "type": ["null", "string"]
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -198,7 +198,8 @@
             }
           },
           "traceId": {
-            "type": ["null", "string"]
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -210,10 +211,8 @@
             "type": "boolean"
           },
           "data": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
+            "nullable": true,
+            "allOf": [
               {
                 "$ref": "#/components/schemas/RegisterFirResponse"
               }
@@ -226,7 +225,8 @@
             }
           },
           "traceId": {
-            "type": ["null", "string"]
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -247,7 +247,8 @@
             "type": "string"
           },
           "addressLine2": {
-            "type": ["null", "string"]
+            "type": "string",
+            "nullable": true
           },
           "villageOrCity": {
             "type": "string"
@@ -259,17 +260,34 @@
             "type": "string"
           },
           "pinCode": {
-            "type": ["null", "string"]
+            "type": "string",
+            "nullable": true
           },
           "latitude": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": ["null", "number", "string"],
-            "format": "double"
+            "oneOf": [
+              {
+                "type": "number",
+                "format": "double"
+              },
+              {
+                "type": "string",
+                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$"
+              }
+            ],
+            "nullable": true
           },
           "longitude": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": ["null", "number", "string"],
-            "format": "double"
+            "oneOf": [
+              {
+                "type": "number",
+                "format": "double"
+              },
+              {
+                "type": "string",
+                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$"
+              }
+            ],
+            "nullable": true
           }
         }
       },
@@ -340,7 +358,8 @@
             "type": "string"
           },
           "addressLine2": {
-            "type": ["null", "string"]
+            "type": "string",
+            "nullable": true
           },
           "villageOrCity": {
             "type": "string"
@@ -352,17 +371,34 @@
             "type": "string"
           },
           "pinCode": {
-            "type": ["null", "string"]
+            "type": "string",
+            "nullable": true
           },
           "latitude": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": ["null", "number", "string"],
-            "format": "double"
+            "oneOf": [
+              {
+                "type": "number",
+                "format": "double"
+              },
+              {
+                "type": "string",
+                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$"
+              }
+            ],
+            "nullable": true
           },
           "longitude": {
-            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
-            "type": ["null", "number", "string"],
-            "format": "double"
+            "oneOf": [
+              {
+                "type": "number",
+                "format": "double"
+              },
+              {
+                "type": "string",
+                "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$"
+              }
+            ],
+            "nullable": true
           }
         }
       },
