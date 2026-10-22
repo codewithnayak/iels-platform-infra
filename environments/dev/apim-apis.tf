@@ -1,9 +1,9 @@
 module "fir_api" {
   source = "../../modules/apim-api"
 
-  name                = "iels-fir-api"
-  display_name        = "IELS FIR Manager API"
-  path                = "fir"
+  name         = "iels-fir-api"
+  display_name = "IELS FIR Manager API"
+  path         = "fir"
 
   resource_group_name = "rg-iels-dev"
   api_management_name = module.apim.name
