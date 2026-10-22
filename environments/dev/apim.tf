@@ -6,7 +6,7 @@ module "apim" {
   location            = "uksouth"
 
   publisher_name  = "IELS"
-  publisher_email = "REPLACE_WITH_YOUR_EMAIL"
+  publisher_email = "sekharinweb@gmail.com"
 
   sku_name = "Consumption_0"
 
